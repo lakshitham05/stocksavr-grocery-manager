@@ -1,24 +1,44 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { Layout, Card, btn, btnAccent } from "@/components/Layout";
+import { useStore, isLowStock, isNearExpiry, isExpired, isToday, inr } from "@/lib/store";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
 export const Route = createFileRoute("/")({
-  component: Index,
+  head: () => ({
+    meta: [
+      { title: "Dashboard — StockSavr" },
+      { name: "description", content: "StockSavr helps small grocery shops track stock, sales and expiry dates." },
+      { property: "og:title", content: "StockSavr — Shop stock made simple" },
+      { property: "og:description", content: "Track stock, sales and expiry dates for your grocery shop." },
+    ],
+  }),
+  component: Dashboard,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
+function Dashboard() {
+  const { products, sales } = useStore();
+  const stats = [
+    { label: "Total products", value: products.length, cls: "border-l-primary" },
+    { label: "Total stock units", value: products.reduce((s, p) => s + p.quantity, 0), cls: "border-l-primary" },
+    { label: "Low stock", value: products.filter(isLowStock).length, cls: "border-l-warning" },
+    { label: "Near expiry (7 days)", value: products.filter(isNearExpiry).length, cls: "border-l-accent" },
+    { label: "Expired", value: products.filter(isExpired).length, cls: "border-l-destructive" },
+    { label: "Today's sales", value: inr(sales.filter((s) => isToday(s.at)).reduce((a, s) => a + s.total, 0)), cls: "border-l-accent" },
+  ];
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
+    <Layout title="Dashboard">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
+        {stats.map((s) => (
+          <Card key={s.label} className={`border-l-4 ${s.cls}`}>
+            <p className="text-sm text-muted-foreground">{s.label}</p>
+            <p className="mt-1 text-2xl font-bold">{s.value}</p>
+          </Card>
+        ))}
+      </div>
+      <div className="mt-6 flex flex-wrap gap-3">
+        <Link to="/sale" className={btn}>Record a sale</Link>
+        <Link to="/products" className={btnAccent}>Manage products</Link>
+        <Link to="/alerts" className="inline-flex items-center rounded-md border px-4 py-2 text-sm font-semibold hover:bg-muted">View alerts</Link>
+      </div>
+    </Layout>
   );
 }
