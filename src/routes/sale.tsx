@@ -48,8 +48,8 @@ function SalePage() {
                   </option>
                 ))}
               </select>
-              <span className="mt-2 block text-muted-foreground">Expired products cannot be sold. Expired food cannot be sold or donated.</span>
             </label>
+            <p className="text-sm text-muted-foreground">Expired products cannot be sold. Expired food cannot be sold or donated.</p>
             <label className="block text-sm">
               <span className="mb-1 block font-medium">Quantity sold</span>
               <input className={input} type="number" min={1} value={qty} onChange={(e) => { setQty(e.target.value); setMsg(null); }} />
