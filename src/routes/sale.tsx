@@ -48,7 +48,7 @@ function SalePage() {
             </label>
             <label className="block text-sm">
               <span className="mb-1 block font-medium">Quantity sold</span>
-              <input className={input} type="number" min={1} max={p?.quantity} value={qty} onChange={(e) => { setQty(e.target.value); setMsg(null); }} />
+              <input className={input} type="number" min={1} value={qty} onChange={(e) => { setQty(e.target.value); setMsg(null); }} />
             </label>
             <div className="flex items-center justify-between rounded-lg bg-muted p-3">
               <span className="text-sm text-muted-foreground">Total</span>

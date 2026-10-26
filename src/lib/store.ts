@@ -110,7 +110,7 @@ export function recordSale(productId: string, qty: number): string | null {
 }
 
 export function daysUntil(date: string) {
-  const [y, m, d] = date.split("-").map(Number);
+  const [y = 0, m = 1, d = 1] = date.split("-").map(Number);
   const t = new Date(); t.setHours(0, 0, 0, 0);
   return Math.round((new Date(y, m - 1, d).getTime() - t.getTime()) / 86400000);
 }
