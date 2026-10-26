@@ -40,7 +40,7 @@ function SalePage() {
           <form onSubmit={submit} className="space-y-4">
             <label className="block text-sm">
               <span className="mb-1 block font-medium">Product</span>
-              <select className={input} value={pid} onChange={(e) => { setPid(e.target.value); setMsg(null); }}>
+              <select aria-label="Product" className={input} value={pid} onChange={(e) => { setPid(e.target.value); setMsg(null); }}>
                 <option value="">Choose a product…</option>
                 {products.map((x) => (
                   <option key={x.id} value={x.id} disabled={x.quantity === 0 || isExpired(x)}>
