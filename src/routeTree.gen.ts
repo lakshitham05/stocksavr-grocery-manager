@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AlertsRouteImport } from './routes/alerts'
+import { Route as FoodRescueRouteImport } from './routes/food-rescue'
 import { Route as ProductsRouteImport } from './routes/products'
 import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as SaleRouteImport } from './routes/sale'
@@ -23,6 +24,11 @@ const IndexRoute = IndexRouteImport.update({
 const AlertsRoute = AlertsRouteImport.update({
   id: '/alerts',
   path: '/alerts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FoodRescueRoute = FoodRescueRouteImport.update({
+  id: '/food-rescue',
+  path: '/food-rescue',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProductsRoute = ProductsRouteImport.update({
@@ -44,6 +50,7 @@ const SaleRoute = SaleRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/alerts': typeof AlertsRoute
+  '/food-rescue': typeof FoodRescueRoute
   '/products': typeof ProductsRoute
   '/reports': typeof ReportsRoute
   '/sale': typeof SaleRoute
@@ -51,6 +58,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/alerts': typeof AlertsRoute
+  '/food-rescue': typeof FoodRescueRoute
   '/products': typeof ProductsRoute
   '/reports': typeof ReportsRoute
   '/sale': typeof SaleRoute
@@ -59,21 +67,31 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/alerts': typeof AlertsRoute
+  '/food-rescue': typeof FoodRescueRoute
   '/products': typeof ProductsRoute
   '/reports': typeof ReportsRoute
   '/sale': typeof SaleRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/alerts' | '/products' | '/reports' | '/sale'
+  fullPaths:
+    '/' | '/alerts' | '/food-rescue' | '/products' | '/reports' | '/sale'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/alerts' | '/products' | '/reports' | '/sale'
-  id: '__root__' | '/' | '/alerts' | '/products' | '/reports' | '/sale'
+  to: '/' | '/alerts' | '/food-rescue' | '/products' | '/reports' | '/sale'
+  id:
+    | '__root__'
+    | '/'
+    | '/alerts'
+    | '/food-rescue'
+    | '/products'
+    | '/reports'
+    | '/sale'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AlertsRoute: typeof AlertsRoute
+  FoodRescueRoute: typeof FoodRescueRoute
   ProductsRoute: typeof ProductsRoute
   ReportsRoute: typeof ReportsRoute
   SaleRoute: typeof SaleRoute
@@ -93,6 +111,13 @@ declare module '@tanstack/react-router' {
       path: '/alerts'
       fullPath: '/alerts'
       preLoaderRoute: typeof AlertsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/food-rescue': {
+      id: '/food-rescue'
+      path: '/food-rescue'
+      fullPath: '/food-rescue'
+      preLoaderRoute: typeof FoodRescueRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/products': {
@@ -122,6 +147,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AlertsRoute: AlertsRoute,
+  FoodRescueRoute: FoodRescueRoute,
   ProductsRoute: ProductsRoute,
   ReportsRoute: ReportsRoute,
   SaleRoute: SaleRoute,

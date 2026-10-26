@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
+import { Button } from "@/components/ui/button";
 import { Layout, Card, btn, input } from "@/components/Layout";
-import { useStore, recordSale, inr } from "@/lib/store";
+import { useStore, recordSale, inr, isExpired } from "@/lib/store";
 
 export const Route = createFileRoute("/sale")({
   head: () => ({
@@ -10,6 +11,8 @@ export const Route = createFileRoute("/sale")({
       { name: "description", content: "Record a sale and update stock automatically." },
       { property: "og:title", content: "Record Sale — StockSavr" },
       { property: "og:description", content: "Quickly record shop sales in rupees." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: SalePage,
@@ -37,15 +40,16 @@ function SalePage() {
           <form onSubmit={submit} className="space-y-4">
             <label className="block text-sm">
               <span className="mb-1 block font-medium">Product</span>
-              <select className={input} value={pid} onChange={(e) => { setPid(e.target.value); setMsg(null); }}>
+              <select aria-label="Product" className={input} value={pid} onChange={(e) => { setPid(e.target.value); setMsg(null); }}>
                 <option value="">Choose a product…</option>
                 {products.map((x) => (
-                  <option key={x.id} value={x.id} disabled={x.quantity === 0}>
-                    {x.name} — {inr(x.sellPrice)} ({x.quantity} left)
+                  <option key={x.id} value={x.id} disabled={x.quantity === 0 || isExpired(x)}>
+                    {x.name} — {isExpired(x) ? "Expired — cannot be sold" : `${inr(x.sellPrice)} (${x.quantity} left)`}
                   </option>
                 ))}
               </select>
             </label>
+            <p className="text-sm text-muted-foreground">Expired products cannot be sold. Expired food cannot be sold or donated.</p>
             <label className="block text-sm">
               <span className="mb-1 block font-medium">Quantity sold</span>
               <input className={input} type="number" min={1} value={qty} onChange={(e) => { setQty(e.target.value); setMsg(null); }} />
@@ -54,7 +58,8 @@ function SalePage() {
               <span className="text-sm text-muted-foreground">Total</span>
               <span className="text-xl font-bold">{inr(total)}</span>
             </div>
-            <button type="submit" className={`${btn} w-full`} disabled={!pid}>Save sale</button>
+            {p && isExpired(p) && <p role="alert" className="text-sm text-destructive">{p.name} has expired and cannot be sold.</p>}
+            <Button type="submit" className={`${btn} w-full`} disabled={!pid || (p && isExpired(p))}>Save sale</Button>
             {msg && <p role="status" className={`text-sm font-medium ${msg.ok ? "text-primary" : "text-destructive"}`}>{msg.text}</p>}
           </form>
         </Card>

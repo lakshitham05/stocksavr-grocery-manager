@@ -9,6 +9,8 @@ export const Route = createFileRoute("/alerts")({
       { name: "description", content: "Expired, near-expiry and low-stock products." },
       { property: "og:title", content: "Alerts — StockSavr" },
       { property: "og:description", content: "See what needs attention in your shop." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Alerts,

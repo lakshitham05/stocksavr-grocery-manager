@@ -9,6 +9,7 @@ export type Product = {
   sellPrice: number;
   buyPrice: number;
   expiry: string; // YYYY-MM-DD
+  isFood?: boolean; // Existing grocery products are food unless explicitly marked otherwise.
 };
 export type Sale = {
   id: string;
@@ -22,6 +23,8 @@ export type Sale = {
 
 const PK = "stocksavr.products";
 const SK = "stocksavr.sales";
+const RK = "stocksavr.rescue";
+export type RescueAction = { productId: string; expiry: string; discountOffer: boolean; donation: boolean };
 const listeners = new Set<() => void>();
 
 export const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
@@ -76,6 +79,42 @@ export function getProducts(): Product[] {
   return p;
 }
 export const getSales = (): Sale[] => read<Sale[]>(SK) ?? [];
+export const getRescueActions = (): RescueAction[] => read<RescueAction[]>(RK) ?? [];
+
+export const isRescueEligible = (p: Product) => p.isFood !== false && isNearExpiry(p);
+
+export function rescueDiscount(days: number): number | null {
+  if (!Number.isInteger(days) || days < 0 || days > 7) return null;
+  if (days <= 2) return 40; // Expiry-day food gets the most urgent recommendation too.
+  return days <= 4 ? 25 : 10;
+}
+
+export function markRescue(productId: string, action: "discountOffer" | "donation"): string | null {
+  const p = getProducts().find((product) => product.id === productId);
+  if (!p || !isRescueEligible(p)) return "Only non-expired food expiring within 7 days can be rescued.";
+  if (p.quantity <= 0) return "No stock available for this action.";
+  const actions = getRescueActions();
+  let entry = actions.find((entry) => entry.productId === p.id && entry.expiry === p.expiry);
+  if (!entry) {
+    entry = { productId: p.id, expiry: p.expiry, discountOffer: false, donation: false };
+    actions.push(entry);
+  }
+  entry[action] = true;
+  localStorage.setItem(RK, JSON.stringify(actions));
+  listeners.forEach((l) => l());
+  return null;
+}
+
+export function rescueImpact(products: Product[], actions: RescueAction[]) {
+  const eligible = products.filter(isRescueEligible);
+  const marked = eligible.map((p) => ({ p, action: actions.find((a) => a.productId === p.id && a.expiry === p.expiry) }));
+  return {
+    eligibleProducts: eligible.length,
+    unitsSaved: marked.reduce((sum, { p, action }) => sum + (action?.discountOffer || action?.donation ? p.quantity : 0), 0),
+    discountOffers: marked.filter(({ action }) => action?.discountOffer).length,
+    donations: marked.filter(({ action }) => action?.donation).length,
+  };
+}
 
 function save(products: Product[], sales?: Sale[]) {
   localStorage.setItem(PK, JSON.stringify(products));
@@ -98,6 +137,7 @@ export function recordSale(productId: string, qty: number): string | null {
   const all = getProducts();
   const p = all.find((x) => x.id === productId);
   if (!p) return "Please choose a product.";
+  if (isExpired(p)) return `${p.name} has expired and cannot be sold. Expired food cannot be sold or donated.`;
   if (!Number.isInteger(qty) || qty <= 0) return "Quantity must be a whole number above 0.";
   if (qty > p.quantity) return `Only ${p.quantity} units of ${p.name} available.`;
   p.quantity -= qty;
@@ -111,8 +151,8 @@ export function recordSale(productId: string, qty: number): string | null {
 
 export function daysUntil(date: string) {
   const [y = 0, m = 1, d = 1] = date.split("-").map(Number);
-  const t = new Date(); t.setHours(0, 0, 0, 0);
-  return Math.round((new Date(y, m - 1, d).getTime() - t.getTime()) / 86400000);
+  const t = new Date();
+  return (Date.UTC(y, m - 1, d) - Date.UTC(t.getFullYear(), t.getMonth(), t.getDate())) / 86400000;
 }
 export const isExpired = (p: Product) => daysUntil(p.expiry) < 0;
 export const isNearExpiry = (p: Product) => { const d = daysUntil(p.expiry); return d >= 0 && d <= 7; };
@@ -121,15 +161,16 @@ export const isToday = (iso: string) => ymd(new Date(iso)) === ymd(new Date());
 export const inr = (n: number) => "₹" + n.toLocaleString("en-IN", { maximumFractionDigits: 2 });
 
 export function useStore() {
-  const [state, setState] = useState<{ products: Product[]; sales: Sale[]; ready: boolean }>({
-    products: [], sales: [], ready: false,
+  const [state, setState] = useState<{ products: Product[]; sales: Sale[]; rescueActions: RescueAction[]; ready: boolean }>({
+    products: [], sales: [], rescueActions: [], ready: false,
   });
   useEffect(() => {
-    const load = () => setState({ products: getProducts(), sales: getSales(), ready: true });
+    const load = () => setState({ products: getProducts(), sales: getSales(), rescueActions: getRescueActions(), ready: true });
     load();
     listeners.add(load);
     window.addEventListener("storage", load);
-    return () => { listeners.delete(load); window.removeEventListener("storage", load); };
+    const timer = window.setInterval(load, 60_000);
+    return () => { listeners.delete(load); window.removeEventListener("storage", load); window.clearInterval(timer); };
   }, []);
   return state;
 }

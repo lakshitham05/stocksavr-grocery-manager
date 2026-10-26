@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { LayoutDashboard, Package, ShoppingCart, Bell, BarChart3 } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingCart, Bell, BarChart3, HeartHandshake } from "lucide-react";
 import type { ReactNode } from "react";
 
 const nav = [
@@ -7,6 +7,7 @@ const nav = [
   { to: "/products", label: "Products", icon: Package },
   { to: "/sale", label: "Record Sale", icon: ShoppingCart },
   { to: "/alerts", label: "Alerts", icon: Bell },
+  { to: "/food-rescue", label: "Food Rescue", icon: HeartHandshake },
   { to: "/reports", label: "Reports", icon: BarChart3 },
 ] as const;
 
@@ -32,10 +33,10 @@ export function Layout({ title, children }: { title: string; children: ReactNode
         <h1 className="mb-5 text-2xl font-bold">{title}</h1>
         {children}
       </main>
-      <nav className="fixed inset-x-0 bottom-0 z-20 grid grid-cols-5 border-t bg-card md:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-20 grid grid-cols-6 border-t bg-card md:hidden">
         {nav.map((n) => (
           <Link key={n.to} to={n.to} activeOptions={{ exact: true }}
-            className="flex flex-col items-center gap-0.5 py-2 text-[11px] text-muted-foreground data-[status=active]:text-primary">
+            className="flex min-w-0 flex-col items-center gap-0.5 px-1 py-2 text-center text-[11px] text-muted-foreground data-[status=active]:text-primary">
             <n.icon className="h-5 w-5" />
             {n.label.replace("Record ", "")}
           </Link>

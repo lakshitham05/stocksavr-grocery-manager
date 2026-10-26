@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
 import { Pencil, Trash2, Plus } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Layout, Card, btn, btnGhost, input } from "@/components/Layout";
 import { useStore, upsertProduct, deleteProduct, uid, inr, isExpired, isNearExpiry, isLowStock, type Product } from "@/lib/store";
 
@@ -11,6 +12,8 @@ export const Route = createFileRoute("/products")({
       { name: "description", content: "Add, edit and search your shop's products." },
       { property: "og:title", content: "Products — StockSavr" },
       { property: "og:description", content: "Manage your grocery product list and stock." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Products,
@@ -26,6 +29,7 @@ function Products() {
   const [form, setForm] = useState<typeof empty | null>(null);
   const [editId, setEditId] = useState<string | null>(null);
   const [err, setErr] = useState("");
+  const [food, setFood] = useState(true);
 
   const cats = [...new Set(products.map((p) => p.category))].sort();
   const list = products.filter((p) =>
@@ -35,6 +39,7 @@ function Products() {
 
   const open = (p?: Product) => {
     setErr("");
+    setFood(p?.isFood !== false);
     setEditId(p?.id ?? null);
     setForm(p ? { ...p, quantity: String(p.quantity), lowStock: String(p.lowStock), sellPrice: String(p.sellPrice), buyPrice: String(p.buyPrice) } : empty);
   };
@@ -44,7 +49,7 @@ function Products() {
     const n = { quantity: +form.quantity, lowStock: +form.lowStock, sellPrice: +form.sellPrice, buyPrice: +form.buyPrice };
     if (!form.name.trim() || !form.category.trim() || !form.expiry) return setErr("Please fill in all fields.");
     if (Object.values(n).some((v) => isNaN(v) || v < 0) || form.quantity === "" || form.sellPrice === "") return setErr("Numbers must be 0 or more.");
-    upsertProduct({ id: editId ?? uid(), name: form.name.trim(), category: form.category.trim(), expiry: form.expiry, ...n });
+    upsertProduct({ id: editId ?? uid(), name: form.name.trim(), category: form.category.trim(), expiry: form.expiry, isFood: food, ...n });
     setForm(null);
   };
   const f = (k: keyof typeof empty, label: string, type = "text") => (
@@ -84,6 +89,7 @@ function Products() {
             {f("sellPrice", "Selling price (₹)", "number")}
             {f("buyPrice", "Purchase price (₹)", "number")}
             {f("expiry", "Expiry date", "date")}
+            <label className="flex items-center gap-2 text-sm"><Checkbox checked={food} onCheckedChange={(checked) => setFood(checked === true)} />Food product</label>
             <div className="flex items-end gap-2">
               <button type="submit" className={btn}>{editId ? "Save changes" : "Add product"}</button>
               <button type="button" className={btnGhost} onClick={() => setForm(null)}>Cancel</button>
