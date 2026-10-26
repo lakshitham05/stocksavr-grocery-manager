@@ -35,7 +35,7 @@ function Alerts() {
       <div className="grid gap-4 lg:grid-cols-3">
         <Section title="Expired" cls="border-l-destructive bg-destructive/5" items={products.filter(isExpired)}
           info={(p) => `${-daysUntil(p.expiry)} day(s) ago`} />
-        <Section title="Expiring within 7 days" cls="border-l-accent bg-accent/10" items={products.filter(isNearExpiry)}
+        <Section title="Expiring within 7 days" cls="border-l-accent bg-accent/20" items={products.filter(isNearExpiry)}
           info={(p) => (daysUntil(p.expiry) === 0 ? "today" : `in ${daysUntil(p.expiry)} day(s)`)} />
         <Section title="Low stock" cls="border-l-warning bg-warning/15" items={products.filter(isLowStock)}
           info={(p) => `${p.quantity} left (limit ${p.lowStock})`} />
