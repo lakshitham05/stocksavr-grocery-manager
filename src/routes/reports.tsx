@@ -10,6 +10,8 @@ export const Route = createFileRoute("/reports")({
       { name: "description", content: "Simple sales reports for your shop." },
       { property: "og:title", content: "Reports — StockSavr" },
       { property: "og:description", content: "Daily and total sales at a glance." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Reports,

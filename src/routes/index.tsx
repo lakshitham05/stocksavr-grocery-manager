@@ -9,6 +9,8 @@ export const Route = createFileRoute("/")({
       { name: "description", content: "StockSavr helps small grocery shops track stock, sales and expiry dates." },
       { property: "og:title", content: "StockSavr — Shop stock made simple" },
       { property: "og:description", content: "Track stock, sales and expiry dates for your grocery shop." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Dashboard,
