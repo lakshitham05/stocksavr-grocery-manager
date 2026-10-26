@@ -14,7 +14,105 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      products: {
+        Row: {
+          buy_price: number
+          category: string
+          expiry: string
+          id: string
+          is_food: boolean
+          low_stock: number
+          name: string
+          quantity: number
+          sell_price: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          buy_price?: number
+          category?: string
+          expiry: string
+          id: string
+          is_food?: boolean
+          low_stock?: number
+          name: string
+          quantity?: number
+          sell_price?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          buy_price?: number
+          category?: string
+          expiry?: string
+          id?: string
+          is_food?: boolean
+          low_stock?: number
+          name?: string
+          quantity?: number
+          sell_price?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      rescue_actions: {
+        Row: {
+          discount_offer: boolean
+          donation: boolean
+          expiry: string
+          product_id: string
+          user_id: string
+        }
+        Insert: {
+          discount_offer?: boolean
+          donation?: boolean
+          expiry: string
+          product_id: string
+          user_id?: string
+        }
+        Update: {
+          discount_offer?: boolean
+          donation?: boolean
+          expiry?: string
+          product_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      sales: {
+        Row: {
+          id: string
+          product_id: string
+          product_name: string
+          quantity: number
+          sold_at: string
+          total: number
+          unit_price: number
+          user_id: string
+        }
+        Insert: {
+          id: string
+          product_id: string
+          product_name: string
+          quantity: number
+          sold_at?: string
+          total: number
+          unit_price: number
+          user_id?: string
+        }
+        Update: {
+          id?: string
+          product_id?: string
+          product_name?: string
+          quantity?: number
+          sold_at?: string
+          total?: number
+          unit_price?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

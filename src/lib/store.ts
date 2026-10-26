@@ -27,6 +27,26 @@ const RK = "stocksavr.rescue";
 export type RescueAction = { productId: string; expiry: string; discountOffer: boolean; donation: boolean };
 const listeners = new Set<() => void>();
 
+// Cloud sync hook: the sync layer registers here and pushes each change to the database.
+export type Change =
+  | { kind: "product"; product: Product }
+  | { kind: "deleteProduct"; id: string }
+  | { kind: "sale"; sale: Sale; product: Product }
+  | { kind: "rescue"; action: RescueAction };
+let changeHook: ((c: Change) => void) | null = null;
+export const setChangeHook = (fn: ((c: Change) => void) | null) => { changeHook = fn; };
+const emit = (c: Change) => changeHook?.(c);
+
+/** Replace the local cache with data loaded from the cloud. */
+export function replaceAll(products: Product[], sales: Sale[], actions: RescueAction[]) {
+  localStorage.setItem(PK, JSON.stringify(products));
+  localStorage.setItem(SK, JSON.stringify(sales));
+  localStorage.setItem(RK, JSON.stringify(actions));
+  listeners.forEach((l) => l());
+}
+export const sampleProducts = () => seed();
+export const hasLocalProducts = () => read<Product[]>(PK) !== null;
+
 export const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
 
 export function ymd(d: Date) {
@@ -101,6 +121,7 @@ export function markRescue(productId: string, action: "discountOffer" | "donatio
   }
   entry[action] = true;
   localStorage.setItem(RK, JSON.stringify(actions));
+  emit({ kind: "rescue", action: { ...entry } });
   listeners.forEach((l) => l());
   return null;
 }
@@ -128,9 +149,11 @@ export function upsertProduct(p: Product) {
   if (i >= 0) all[i] = p;
   else all.unshift(p);
   save(all);
+  emit({ kind: "product", product: p });
 }
 export function deleteProduct(id: string) {
   save(getProducts().filter((p) => p.id !== id));
+  emit({ kind: "deleteProduct", id });
 }
 
 export function recordSale(productId: string, qty: number): string | null {
@@ -146,6 +169,7 @@ export function recordSale(productId: string, qty: number): string | null {
     unitPrice: p.sellPrice, total: qty * p.sellPrice, at: new Date().toISOString(),
   };
   save(all, [sale, ...getSales()]);
+  emit({ kind: "sale", sale, product: { ...p } });
   return null;
 }
 

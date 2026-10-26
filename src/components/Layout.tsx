@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { LayoutDashboard, Package, ShoppingCart, Bell, BarChart3, HeartHandshake } from "lucide-react";
 import type { ReactNode } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 const nav = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -27,6 +28,9 @@ export function Layout({ title, children }: { title: string; children: ReactNode
               </Link>
             ))}
           </nav>
+          <button onClick={() => supabase.auth.signOut()} className="rounded-md border border-primary-foreground/30 px-3 py-1.5 text-sm font-medium hover:bg-primary-foreground/15">
+            Sign out
+          </button>
         </div>
       </header>
       <main className="mx-auto max-w-6xl px-4 py-6">
