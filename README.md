@@ -19,3 +19,9 @@ bun install   # or npm install
 bun run dev   # or npm run dev
 ```
 Then open the URL shown in the terminal (usually http://localhost:8080).
+
+## Cloud sync and sign-in
+
+StockSavr now saves products, sales and Food Rescue actions to your Lovable Cloud database. Sign in with email or Google on any device to see the same shop data; changes made on one device appear on the others automatically.
+
+On your first sign-in, any data already saved in that browser is uploaded to your account (once). New accounts with no data start with sample products. A local copy is still kept in the browser as a cache.
