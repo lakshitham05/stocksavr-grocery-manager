@@ -37,7 +37,7 @@ export async function pullFromCloud(userId: string) {
     check(supabase.from("sales").select("*").order("sold_at", { ascending: false })),
     check(supabase.from("rescue_actions").select("*")),
   ]);
-  if (!pr.data.length && !sr.data.length) {
+  if (!(pr.data ?? []).length && !(sr.data ?? []).length) {
     // First sign-in: move this browser's existing records to the cloud (once), otherwise start with samples.
     const owner = localStorage.getItem(OWNER_KEY);
     if (!owner && hasLocalProducts()) await uploadAll(userId, getProducts(), getSales(), getRescueActions());
@@ -47,15 +47,15 @@ export async function pullFromCloud(userId: string) {
   }
   localStorage.setItem(OWNER_KEY, userId);
   replaceAll(
-    pr.data.map((r) => ({
+    (pr.data ?? []).map((r) => ({
       id: r.id, name: r.name, category: r.category, quantity: r.quantity, lowStock: r.low_stock,
       sellPrice: Number(r.sell_price), buyPrice: Number(r.buy_price), expiry: r.expiry, isFood: r.is_food,
     })),
-    sr.data.map((r) => ({
+    (sr.data ?? []).map((r) => ({
       id: r.id, productId: r.product_id, productName: r.product_name, quantity: r.quantity,
       unitPrice: Number(r.unit_price), total: Number(r.total), at: r.sold_at,
     })),
-    rr.data.map((r) => ({ productId: r.product_id, expiry: r.expiry, discountOffer: r.discount_offer, donation: r.donation })),
+    (rr.data ?? []).map((r) => ({ productId: r.product_id, expiry: r.expiry, discountOffer: r.discount_offer, donation: r.donation })),
   );
 }
 
